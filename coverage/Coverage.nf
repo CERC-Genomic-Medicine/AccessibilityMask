@@ -37,18 +37,3 @@ process aggregate {
    aggregate.py -i files_list.txt -o ${chromosome}.full.json.gz
    """
 }
-
-process prune {
-   input:
-   set val(chromosome), file(full_json), file(full_json_tbi) from aggregated
-   each limit from Channel.from(params.prune_limits)
-
-   output:
-   tuple file("${chromosome}.bin_${limit}.json.gz"), file("${chromosome}.bin_${limit}.json.gz.tbi")
-
-   publishDir "result/bin_${limit}", pattern: "*.bin_*.json.gz*"
-
-   """
-   prune.py -i ${full_json} -l ${limit} -o ${chromosome}.bin_${limit}.json.gz
-   """
-}
