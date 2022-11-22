@@ -15,7 +15,7 @@ process pileup {
         file("${chromosome}.${name}.depth.gz"), 
         file("${chromosome}.${name}.depth.gz.tbi") into pileups
 
-  publishDir "result/${chromosome}", pattern: "*.depth*"
+  publishDir "result/depth/${chromosome}", pattern: "*.depth*"
 
   """
   samtools depth -a -s -q20 -Q20 -r ${chromosome} ${cram}  |\
@@ -28,12 +28,26 @@ process aggregate {
    tuple val(chromosome), file(depth_files), file(depth_tbis) from pileups.groupTuple()
 
    output:
-   tuple val(chromosome), file("${chromosome}.full.json.gz"), file("${chromosome}.full.json.gz.tbi") into aggregated
+   tuple val(chromosome), file("${chromosome}.full.json.gz"), file("${chromosome}.full.json.gz.tbi") into aggregated mode flatten
 
-   publishDir "result/full", pattern: "*.full.json.gz*"
+   publishDir "result/full/${chromosome}", pattern: "*.full.json.gz*"
 
    """
    find . -name "${chromosome}.*.depth.gz" > files_list.txt
    aggregate.py -i files_list.txt -o ${chromosome}.full.json.gz
+   """
+}
+
+process extract_high_coverage{
+   input:
+   tuple val(chromosome), file(aggregate_files), file(aggregate_tbis) from aggregated 
+
+   output:
+   tuple val(chromosome), file(*.txt") into high_cov
+
+   publishDir "result/full/${chromosome}/high_cov_regions", pattern: "*.txt"
+
+   """
+   High_coverage_regions.py -i $depth_files -dp "10X" -ind 1 -o ${chromosome}.high_coverage_over_10X_all_inds.txt
    """
 }

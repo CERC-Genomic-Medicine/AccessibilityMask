@@ -76,6 +76,6 @@ if __name__ == "__main__":
     out_file_path = args.out_file_path
     pos_list, chrom = load_coverage_data(depth_file, min_depth, pct_ind)
     intervals = pd.DataFrame(interval_extract(pos_list, chrom))
-    intervals.to_csv("high_coverage_regions.txt", sep="/t")
+    intervals.to_csv(out_file_path, sep="/t")
     exit()
     
