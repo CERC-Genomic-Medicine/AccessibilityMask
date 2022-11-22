@@ -43,7 +43,7 @@ process extract_high_coverage{
     tuple val(chromosome), file(aggregate_file), file(aggregate_tbi) from aggregated 
 
     output:
-    tuple val(chromosome), file(*.txt") into high_cov
+    tuple val(chromosome), file("*.txt") into high_cov
 
     publishDir "result/full/${chromosome}/high_cov_regions", pattern: "*.txt"
 
