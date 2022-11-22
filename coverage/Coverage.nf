@@ -48,6 +48,6 @@ process extract_high_coverage{
    publishDir "result/full/${chromosome}/high_cov_regions", pattern: "*.txt"
 
    """
-   High_coverage_regions.py -i $depth_files -dp "10X" -ind 1 -o ${chromosome}.high_coverage_over_10X_all_inds.txt
+   high_coverage_regions.py -i $depth_files -dp "10X" -ind 1 -o ${chromosome}.high_coverage_over_10X_all_inds.txt
    """
 }
