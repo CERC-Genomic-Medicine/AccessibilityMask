@@ -20,7 +20,7 @@ def load_coverage_data(path = '/path/to/depth/data', min_depth = "10X", min_perc
         
     with open(path, 'r') as file:
         header = file.readline().rstrip().split()
-        if column_name not in header:
+        if (column_name not in header):
             raise Exception(f'{column_name} is not in the header.')
         chrom_colindex = header.index('CHROM') 
         bp_colindex = header.index('BP')
@@ -57,12 +57,9 @@ def load_coverage_data(path = '/path/to/depth/data', min_depth = "10X", min_perc
             elif (min_depth == "100X"):
                 if(dp == min_percent):
                     pos_list.append(bp)
-            elif (min_depth == "0X"):
-                    pos_list.append(bp)
-            else:
-                raise Exception("Chosen min-depth is not permited, please ensure that your min-depth is in following list [5X, 10X, 15X, 20X, 25X, 30X, 50X, 100X],\
-                you can also choose 0X in case that you want to work with all variants.")
-
+            #elif (min_depth == "0X"):
+             #       pos_list.append(bp)
+           
         pos_list = sorted(set(pos_list))
         range_start = previous_number = pos_list[0]
 
