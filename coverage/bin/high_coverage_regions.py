@@ -14,59 +14,67 @@ def load_coverage_data(path = '/path/to/depth/data', min_depth = "10X", min_perc
     flag = 0
     pos_list = []
     if ((min_percent > 1) or (min_percent < 0)):
-        raise("minimal percentile of individuals over minimum depth should be between 0 and 1.")
+        raise Exception("minimal percentile of individuals over minimum depth should be between 0 and 1.")
+        
+    column_name = f'PCT_INDV_OVER_{min_depth}'
         
     with open(path, 'r') as file:
+        header = file.readline().rstrip().split()
+        if column_name not in header:
+            raise Exception(f'{column_name} is not in the header.')
+        chrom_colindex = header.index('CHROM') 
+        bp_colindex = header.index('BP')
+        dp_colindex = header.index(column_name)
+        
         for line in file:
-            if flag == 0:
-                flag = 1
-                continue
-            chrom, base_pos, mean_dp, med_dp, pct_1X, pct_5X, pct_10X, pct_15X, pct_20X, pct_25X, pct_30X, pct_50X, pct_100X = line.rstrip().split()
-            base_pos = int(base_pos) - 1
+            columns = line.rstrip().split()
+            chrom = columns[chrom_colindex]
+            bp = int(columns[bp_colindex]) - 1
+            dp = float(columns[dp_colindex])
+
+
             if (min_depth == "5X"):
-                if(float(pct_5X) == min_percent):
-                    pos_list.append(base_pos)
+                if(dp == min_percent):
+                    pos_list.append(bp)
             elif (min_depth == "10X"):
-                if(float(pct_10X) == min_percent):
-                    pos_list.append(base_pos)
+                if(dp == min_percent):
+                    pos_list.append(bp)
             elif (min_depth == "15X"):
-                if(float(pct_15X) == min_percent):
-                    pos_list.append(base_pos)
+                if(dp == min_percent):
+                    pos_list.append(bp)
             elif (min_depth == "20X"):
-                if(float(pct_20X) == min_percent):
-                    pos_list.append(base_pos)
+                if(dp == min_percent):
+                    pos_list.append(bp)
             elif (min_depth == "25X"):
-                if(float(pct_25X) == min_percent):
-                    pos_list.append(base_pos)
+                if(dp == min_percent):
+                    pos_list.append(bp)
             elif (min_depth == "30X"):
-                if(float(pct_30X) == min_percent):
-                    pos_list.append(base_pos)
+                if(dp == min_percent):
+                    pos_list.append(bp)
             elif (min_depth == "50X"):
-                if(float(pct_50X) == min_percent):
-                    pos_list.append(base_pos)
+                if(dp == min_percent):
+                    pos_list.append(bp)
             elif (min_depth == "100X"):
-                if(float(pct_100X) == min_percent):
-                    pos_list.append(base_pos)
+                if(dp == min_percent):
+                    pos_list.append(bp)
             elif (min_depth == "0X"):
-                    pos_list.append(base_pos)
+                    pos_list.append(bp)
             else:
                 raise Exception("Chosen min-depth is not permited, please ensure that your min-depth is in following list [5X, 10X, 15X, 20X, 25X, 30X, 50X, 100X],\
                 you can also choose 0X in case that you want to work with all variants.")
-        return pos_list, chrom
 
-def interval_extract(list, chrom):
-    list = sorted(set(list))
-    range_start = previous_number = list[0]
-  
-    for number in list[1:]:
-        if number == previous_number + 1:
-            previous_number = number
-        else:
-            yield {"CHROM": chrom, "start" : range_start, "end" : previous_number}
-            range_start = previous_number = number
-    
-    yield {"CHROM": chrom, "start" : range_start, "end" : previous_number}
-    
+        pos_list = sorted(set(pos_list))
+        range_start = previous_number = pos_list[0]
+
+        for number in pos_list[1:]:
+            if number == previous_number + 1:
+                previous_number = number
+            else:
+                yield {"CHROM": chrom, "start" : range_start, "end" : previous_number}
+                range_start = previous_number = number
+
+        yield {"CHROM": chrom, "start" : range_start, "end" : previous_number}
+
 
 if __name__ == "__main__":
     args = argparser.parse_args()
@@ -74,8 +82,7 @@ if __name__ == "__main__":
     min_depth = args.in_depth
     pct_ind = args.in_pct
     out_file_path = args.out_file_path
-    pos_list, chrom = load_coverage_data(depth_file, min_depth, pct_ind)
-    intervals = pd.DataFrame(interval_extract(pos_list, chrom))
-    intervals.to_csv(out_file_path, sep="/t")
+    intervals = pd.DataFrame(load_coverage_data(depth_file, min_depth, pct_ind))
+    intervals.to_csv(out_file_path, sep="/t", index=False)
     exit()
     
