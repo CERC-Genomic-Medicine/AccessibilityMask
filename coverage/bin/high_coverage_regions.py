@@ -30,7 +30,7 @@ def load_coverage_data(path_read = '/path/to/depth/data', path_write='/path/to/b
             chrom = columns[chrom_colindex]
             bp = int(columns[bp_colindex]) - 1
             pct = float(columns[pct_colindex])
-            if (pct == min_percent):
+            if (pct >= min_percent):
                 if(range_start == -1):
                     range_start = previous_number = bp
                 else:
