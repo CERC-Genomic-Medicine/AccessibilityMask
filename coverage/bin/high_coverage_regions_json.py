@@ -20,7 +20,7 @@ if __name__ == '__main__':
     min_percent = args.in_pct
     range_start = -1
     with gzip.open(args.in_path, 'rt') as ifile, open(args.out_file_path, 'w') as fw:
-        fw.write(f"CHROM\tstart\tend\n")
+        fw.write(f"chrom\tchromStart\tchromEnd\n")
         for line in ifile:
             chrom, start, stop, data = line.rstrip().split('\t')
             data = rapidjson.loads(data)

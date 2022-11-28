@@ -17,7 +17,7 @@ def load_coverage_data(path_read = '/path/to/depth/data', path_write='/path/to/b
     column_name = f'PCT_INDV_OVER_{min_depth}'
         
     with open(path_read, 'r') as fr, open(path_write, 'w') as fw:
-        fw.write(f'CHROM\tstart\tend\n')
+        fw.write(f'chrom\tchromStart\tchromEnd\n')
         header = fr.readline().rstrip().split()
         if column_name not in header:
             raise Exception(f'{column_name} is not in the header.')
