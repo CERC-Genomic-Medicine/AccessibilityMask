@@ -40,14 +40,14 @@ process aggregate {
 
 process extract_high_coverage{
     input:
-    tuple val(chromosome), file(aggregate_file), file(aggregate_tbi) from aggregated 
+    tuple val(chromosome), file(aggregate_file), file(aggregate_tbi) from aggregated
 
     output:
-    tuple val(chromosome), file("*.txt") into high_cov
+    tuple val(chromosome), file("*.bed") into high_cov
 
-    publishDir "result/full/${chromosome}/high_cov_regions", pattern: "*.txt", mode: "copy"
+    publishDir "result/full/${chromosome}/high_cov_regions", pattern: "*.bed", mode: "copy"
 
     """
-    high_coverage_regions_json.py -i $aggregate_file -dp "10" -ind 1 -o ${chromosome}.high_coverage_over_10X_all_inds.txt
+    high_coverage_regions_json.py -i ${aggregate_file} -dp 10 -ind 1 -o ${chromosome}.high_coverage_over_10X_all_inds.bed
     """
 }
