@@ -1,36 +1,47 @@
 process pileup {
 
-  input:
-  // get ID, ID.cram, and ID.cram.crai from glob of crams
-  tuple val(name), file(cram), file(crai) from Channel 
-                                                 .fromPath(params.cram_files)
-                                                 .map{ ["${it.getSimpleName()}",
-                                                        file("${it}"),
-                                                        file("${it}.crai")] }
-  each chromosome from Channel.from(params.chromosomes)
+   errorStrategy "retry"
+   maxRetries 3
+   cache "lenient"
+   cpus 1
+   memory "4GB"
+   time "4h"
+   scratch true
 
-
-  output:
-  tuple val(chromosome),
-        file("${chromosome}.${name}.depth.gz"), 
-        file("${chromosome}.${name}.depth.gz.tbi") into pileups
-
-  publishDir "result/depth/${chromosome}", pattern: "*.depth*", mode: "copy"
-
-  """
-  samtools depth -a -s -q20 -Q20 -r ${chromosome} ${cram}  |\
-     bgzip > ${chromosome}.${name}.depth.gz
-  tabix -s1 -b2 -e2 ${chromosome}.${name}.depth.gz
-  """
-}
-process aggregate {
    input:
-   tuple val(chromosome), file(depth_files), file(depth_tbis) from pileups.groupTuple()
+   tuple path(bam), path(bam_index)
+   each chromosome
 
    output:
-   tuple val(chromosome), file("${chromosome}.full.json.gz"), file("${chromosome}.full.json.gz.tbi") into aggregated mode flatten
+   tuple val(chromosome),
+      path("${chromosome}.${bam.getSimpleName()}.depth.gz"), 
+      path("${chromosome}.${bam.getSimpleName()}.depth.gz.tbi")
 
-   publishDir "result/full/${chromosome}", pattern: "*.full.json.gz*", mode: "copy"
+    publishDir "result/depth/${chromosome}", pattern: "*.depth*", mode: "copy"
+
+    """
+    samtools depth -a -s -q20 -Q20 -r ${chromosome} ${bam} | bgzip > ${chromosome}.${bam.getSimpleName()}.depth.gz
+    tabix -s1 -b2 -e2 ${chromosome}.${bam.getSimpleName()}.depth.gz
+    """
+}
+
+
+process aggregate {
+   
+   errorStrategy "finish"
+   cache "lenient"
+   cpus 1
+   memory "8GB"
+   time "2d"
+   //scratch true
+
+   input:
+   tuple val(chromosome), path(depth_files), path(depth_indices)
+
+   output:
+   tuple val(chromosome), path("${chromosome}.full.json.gz"), path("${chromosome}.full.json.gz.tbi")
+
+   publishDir "result/aggregated/", pattern: "*.full.json.gz*", mode: "copy"
 
    """
    find . -name "${chromosome}.*.depth.gz" > files_list.txt
@@ -38,16 +49,36 @@ process aggregate {
    """
 }
 
-process extract_high_coverage{
-    input:
-    tuple val(chromosome), file(aggregate_file), file(aggregate_tbi) from aggregated
 
-    output:
-    tuple val(chromosome), file("*.bed") into high_cov
+process create_accessibility_mask {
 
-    publishDir "result/full/${chromosome}/high_cov_regions", pattern: "*.bed", mode: "copy"
+   errorStrategy "finish"
+   cache "lenient"
+   cpus 1
+   memory "4GB"
+   time "1h"
+   //scratch true
 
-    """
-    high_coverage_regions_json.py -i ${aggregate_file} -dp 10 -ind 1 -o ${chromosome}.high_coverage_over_10X_all_inds.bed
-    """
+   input:
+   tuple val(chromosome), path(aggregate_file), path(aggregate_index)
+
+   output:
+   tuple val(chromosome), path("${chromosome}.${params.min_dp}_${params.min_pct_ind}.bed")
+
+   publishDir "result/accessibility_mask/", pattern: "${chromosome}.${params.min_dp}_${params.min_pct_ind}.bed", mode: "copy"
+
+   """
+   high_coverage_regions_json.py -i ${aggregate_file} -dp ${params.min_dp} -ind ${params.min_pct_ind} -o ${chromosome}.${params.min_dp}_${params.min_pct_ind}.bed
+   """
+}
+
+
+workflow {
+   bam_files = Channel.fromPath(params.bam_files).map{ file -> [file, file + (file.getExtension() == "bam" ? ".bai" : ".crai")] }
+   chromosomes = Channel.from(params.chromosomes)
+
+   depth_files = pileup(bam_files, chromosomes)
+   aggregated_files = aggregate(depth_files.groupTuple())
+
+   create_accessibility_mask(aggregated_files)
 }
