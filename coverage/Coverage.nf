@@ -39,13 +39,13 @@ process aggregate {
    tuple val(chromosome), path(depth_files), path(depth_indices)
 
    output:
-   tuple val(chromosome), path("${chromosome}.full.json.gz"), path("${chromosome}.full.json.gz.tbi")
+   tuple val(chromosome), path("${chromosome}.full.tsv.gz"), path("${chromosome}.full.tsv.gz.tbi")
 
-   publishDir "result/aggregated/", pattern: "*.full.json.gz*", mode: "copy"
+   publishDir "result/aggregated/", pattern: "*.full.tsv.gz*", mode: "copy"
 
    """
    find . -name "${chromosome}.*.depth.gz" > files_list.txt
-   aggregate.py -i files_list.txt -o ${chromosome}.full.json.gz
+   aggregate.py -i files_list.txt -o ${chromosome}.full.tsv.gz
    """
 }
 
