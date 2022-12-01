@@ -28,7 +28,7 @@ if __name__ == '__main__':
     with ExitStack() as stack, pysam.BGZFile(args.out_file_name, 'w') as ofile:
         ifiles = [ stack.enter_context(gzip.open(file_name, 'rt')) for file_name in file_names ]
         if(args.output_type_flag == 't'):
-                ofile.write('CHROM\tBP\tMEAN\tMEDIAN\tPCT_INDV_OVER_1X\tPCT_INDV_OVER_5X\tPCT_INDV_OVER_10X\tPCT_INDV_OVER_15X\tPCT_INDV_OVER_20X\tPCT_INDV_OVER_25X\tPCT_INDV_OVER_30X\tPCT_INDV_OVER_50X\tPCT_INDV_OVER_100X'.encode())
+                ofile.write('#CHROM\tBP\tMEAN\tMEDIAN\tPCT_INDV_OVER_1X\tPCT_INDV_OVER_5X\tPCT_INDV_OVER_10X\tPCT_INDV_OVER_15X\tPCT_INDV_OVER_20X\tPCT_INDV_OVER_25X\tPCT_INDV_OVER_30X\tPCT_INDV_OVER_50X\tPCT_INDV_OVER_100X\n'.encode())
         while True:
             for i, ifile in enumerate(ifiles):
                 line = ifile.readline()
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 ofile.write('{}\t{:d}\t{:d}\t{{"chrom":"{}","start":{:d},"end":{:d},"mean":{:g},"median":{:g}'.format(chromosome.replace('chr', '', 1), min_position, min_position, chromosome.replace('chr', '', 1), min_position, min_position, mean(depths), median(depths)).encode())
             for br, cnt in zip(breaks, counts):
                 if(args.output_type_flag == 't'):
-                    ofile.write(f'\t{cnt / n_indv}'.encode())
+                    ofile.write('\t{}'.format(cnt / n_indv).encode())
                 else:
                     ofile.write(',"{:d}":{:g}'.format(br, cnt / n_indv).encode())
 
@@ -61,4 +61,4 @@ if __name__ == '__main__':
                     ofile.write('\n'.encode())
             else:
                     ofile.write('}\n'.encode())
-    pysam.tabix_index(args.out_file_name, seq_col = 0, start_col = 1, end_col = 1, force = True)
+        pysam.tabix_index(args.out_file_name, seq_col = 0, start_col = 1, end_col = 1, force = True)
