@@ -25,5 +25,5 @@ if __name__ == "__main__":
     depth_file = args.in_path
     min_depth = args.in_depth
     out_file_path = args.out_file_path
-    load_coverage_data(path_read = depth_file, path_write = out_file_path, min_depth = min_depth)
+    load_depth_data(path_read = depth_file, path_write = out_file_path, min_depth = min_depth)
     exit() 
