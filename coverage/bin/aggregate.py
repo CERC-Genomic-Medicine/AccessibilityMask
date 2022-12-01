@@ -15,7 +15,7 @@ argparser.add_argument('-f', '--format', metavar = 'string', dest = 'output_form
 if __name__ == '__main__':
     args = argparser.parse_args()
     if args.output_format not in {'t', 'j'}:
-        raise Error('')
+        raise Error(f'Output format should be either \'j\' or \'t\'.')
     file_names = []
     with open(args.in_files_list, 'r') as ifile:
         for line in ifile:
@@ -30,7 +30,6 @@ if __name__ == '__main__':
     with ExitStack() as stack, pysam.BGZFile(args.out_file_name, 'w') as ofile:
         ifiles = [ stack.enter_context(gzip.open(file_name, 'rt')) for file_name in file_names ]
         if (args.output_format == 't'):
-            #ofile.write('#CHROM\tBP\tMEAN\tMEDIAN\tPCT_INDV_OVER_1X\tPCT_INDV_OVER_5X\tPCT_INDV_OVER_10X\tPCT_INDV_OVER_15X\tPCT_INDV_OVER_20X\tPCT_INDV_OVER_25X\tPCT_INDV_OVER_30X\tPCT_INDV_OVER_50X\tPCT_INDV_OVER_100X\n'.encode())
             ofile.write('#CHROM\tBP\tMEAN\tMEDIAN\t{}\n'.format('\t'.join([f'PCT_INDV_OVER_{br}X' for br in breaks])))
         while True:
             for i, ifile in enumerate(ifiles):
@@ -55,12 +54,12 @@ if __name__ == '__main__':
             else:
                 ofile.write('{}\t{:d}\t{:d}\t{{"chrom":"{}","start":{:d},"end":{:d},"mean":{:g},"median":{:g}'.format(chromosome.replace('chr', '', 1), min_position, min_position, chromosome.replace('chr', '', 1), min_position, min_position, mean(depths), median(depths)).encode())
             for br, cnt in zip(breaks, counts):
-                if(args.output_type_flag == 't'):
+                if(args.output_format == 't'):
                     ofile.write('\t{:g}'.format(cnt / n_indv).encode())
                 else:
                     ofile.write(',"{:d}":{:g}'.format(br, cnt / n_indv).encode())
 
-            if(args.output_type_flag == 't'):
+            if(args.output_format == 't'):
                     ofile.write('\n'.encode())
             else:
                     ofile.write('}\n'.encode())
