@@ -24,7 +24,6 @@ if __name__ == "__main__":
     args = argparser.parse_args()
     depth_file = args.in_path
     min_depth = args.in_depth
-    pct_ind = args.in_pct
     out_file_path = args.out_file_path
-    load_coverage_data(path_read = depth_file, path_write = out_file_path, min_depth = min_depth, min_percent = min_percent)
+    load_coverage_data(path_read = depth_file, path_write = out_file_path, min_depth = min_depth)
     exit() 
