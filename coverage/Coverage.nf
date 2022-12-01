@@ -50,6 +50,26 @@ process aggregate {
    """
 }
 
+process calculate_stats {
+   errorStrategy "finish"
+   cache "lenient"
+   cpus 1
+   memory "4GB"
+   time "3h"
+   //scratch true
+
+   input:
+   tuple val(chromosome), path(aggregate_file), path(aggregate_index)
+
+   output:
+   tuple val(chromosome), path("${chromosome}.${params.min_dp}_calculate_stats.txt")
+   
+   publishDir "result/aggregated/", pattern: "*.txt", mode: "copy"
+
+   """
+   compute_stats.py -i ${aggregate_file} -dp ${params.min_dp} -o ${chromosome}.${params.min_dp}_calculate_stats.txt
+   """
+}
 
 process create_accessibility_mask {
 
@@ -80,6 +100,6 @@ workflow {
 
    depth_files = pileup(bam_files, chromosomes)
    aggregated_files = aggregate(depth_files.groupTuple())
-
-   create_accessibility_mask(aggregated_files)
+   calculate_stats(aggregated_files)
+   //create_accessibility_mask(aggregated_files)
 }
