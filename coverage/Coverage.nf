@@ -26,6 +26,7 @@ process pileup {
 }
 
 
+
 process aggregate {
    
    errorStrategy "finish"
@@ -39,13 +40,13 @@ process aggregate {
    tuple val(chromosome), path(depth_files), path(depth_indices)
 
    output:
-   tuple val(chromosome), path("${chromosome}.full.tsv.gz"), path("${chromosome}.full.tsv.gz.tbi")
+   tuple val(chromosome), path("${chromosome}.full.tab.bgz"), path("${chromosome}.full.tab.bgz.tbi")
 
-   publishDir "result/aggregated/", pattern: "*.full.tsv.gz*", mode: "copy"
+   publishDir "result/aggregated/", pattern: "*.full.tab.bgz*", mode: "copy"
 
    """
    find . -name "${chromosome}.*.depth.gz" > files_list.txt
-   aggregate.py -i files_list.txt -o ${chromosome}.full.tsv.gz
+   aggregate.py -f t -i files_list.txt -o ${chromosome}.full.tab.bgz
    """
 }
 

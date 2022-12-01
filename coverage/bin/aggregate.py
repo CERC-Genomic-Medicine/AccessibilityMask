@@ -48,12 +48,12 @@ if __name__ == '__main__':
                     if dp >= breaks[i]:
                         counts[i] += 1
             if(args.output_type_flag == 't'):
-                ofile.write('{}\t{}\t{}\t{}'.format(min_position, chromosome.replace('chr', '', 1), mean(depths), median(depths)).encode())
+                ofile.write('{}\t{:d}\t{:g}\t{:g}'.format(chromosome.replace('chr', '', 1), min_position, mean(depths), median(depths)).encode())
             else:
                 ofile.write('{}\t{:d}\t{:d}\t{{"chrom":"{}","start":{:d},"end":{:d},"mean":{:g},"median":{:g}'.format(chromosome.replace('chr', '', 1), min_position, min_position, chromosome.replace('chr', '', 1), min_position, min_position, mean(depths), median(depths)).encode())
             for br, cnt in zip(breaks, counts):
                 if(args.output_type_flag == 't'):
-                    ofile.write('\t{}'.format(cnt / n_indv).encode())
+                    ofile.write('\t{:g}'.format(cnt / n_indv).encode())
                 else:
                     ofile.write(',"{:d}":{:g}'.format(br, cnt / n_indv).encode())
 
