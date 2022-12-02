@@ -26,27 +26,26 @@ process pileup {
 }
 
 
-
 process aggregate {
    
    errorStrategy "finish"
    cache "lenient"
    cpus 1
    memory "8GB"
-   time "2d"
+   time "3h"
    //scratch true
 
    input:
    tuple val(chromosome), path(depth_files), path(depth_indices)
 
    output:
-   tuple val(chromosome), path("${chromosome}.full.tab.bgz"), path("${chromosome}.full.tab.bgz.tbi")
+   tuple val(chromosome), path("${chromosome}.full.txt.gz")
 
-   publishDir "result/aggregated/", pattern: "*.full.tab.bgz*", mode: "copy"
+   publishDir "result/aggregated/", pattern: "*.full.txt.gz*", mode: "copy"
 
    """
    find . -name "${chromosome}.*.depth.gz" > files_list.txt
-   aggregate.py -f t -i files_list.txt -o ${chromosome}.full.tab.bgz
+   aggregate.py -f t -i files_list.txt -o ${chromosome}.full.txt.gz
    """
 }
 
@@ -55,11 +54,11 @@ process calculate_stats {
    cache "lenient"
    cpus 1
    memory "4GB"
-   time "3h"
+   time "1h"
    //scratch true
 
    input:
-   tuple val(chromosome), path(aggregate_file), path(aggregate_index)
+   tuple val(chromosome), path(aggregate_file)
 
    output:
    tuple val(chromosome), path("${chromosome}.${params.min_dp}_calculate_stats.txt")
@@ -67,7 +66,7 @@ process calculate_stats {
    publishDir "result/aggregated/", pattern: "*.txt", mode: "copy"
 
    """
-   compute_stats.py -i ${aggregate_file} -dp ${params.min_dp} -o ${chromosome}.${params.min_dp}_calculate_stats.txt
+   calculate.py -i ${aggregate_file} -dp ${params.min_dp} -o ${chromosome}.${params.min_dp}_calculate_stats.txt
    """
 }
 
