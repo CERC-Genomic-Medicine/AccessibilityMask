@@ -39,7 +39,7 @@ process aggregate {
    tuple val(chromosome), path(depth_files), path(depth_indices)
 
    output:
-   tuple val(chromosome), path("${chromosome}.full.txt.gz")
+   path("${chromosome}.full.txt.gz")
 
    publishDir "result/aggregated/", pattern: "*.full.txt.gz*", mode: "copy"
 
@@ -58,15 +58,15 @@ process calculate_stats {
    //scratch true
 
    input:
-   tuple val(chromosome), path(aggregate_file)
+   path(aggregate_file)
 
    output:
-   tuple val(chromosome), path("${chromosome}.${params.min_dp}_calculate_stats.txt")
+   tuple path("${aggregate_file.getSimpleName()}.${params.min_dp}_calculate_stats.txt"), path(aggregate_file)
    
    publishDir "result/aggregated/", pattern: "*.txt", mode: "copy"
 
    """
-   calculate.py -i ${aggregate_file} -dp ${params.min_dp} -o ${chromosome}.${params.min_dp}_calculate_stats.txt
+   calculate.py -i ${aggregate_file} -dp ${params.min_dp} -o ${aggregate_file.getSimpleName()}.${params.min_dp}_calculate_stats.txt
    """
 }
 
@@ -80,23 +80,22 @@ process create_accessibility_mask {
    //scratch true
 
    input:
-   tuple val(chromosome), path(aggregate_file), path(stats)
+   tuple  path(stats), path(aggregate_file)
 
    output:
-   tuple val(chromosome), path("*.bed")
+   path("*.bed")
 
    publishDir "result/accessibility_mask/", pattern: "*.bed", mode: "copy"
 
    """
-   min_pct_ind="\$(awk 'NR == 14 {print \$3}' ${stats})"
-   mean_dp="\$(awk 'NR == 6 {print \$3}' ${stats})"
-   High_coverage_bed.py -i ${aggregate_file} -dp ${params.min_dp} -ind "\${min_pct_ind}" -mdp "\${mean_dp}" -o ${chromosome}.${params.min_dp}_${params.min_pct_ind}_"\${mean_dp}".bed
+   min_pct_ind=\$(grep "^5%" ${stats} | cut -f3)
+   mean_dp=\$(grep "99%" ${stats} | cut -f2)
+   High_coverage_bed.py -i ${aggregate_file} -dp ${params.min_dp} -ind "\${min_pct_ind}" -mdp "\${mean_dp}" -o ${aggregate_file.getBaseName()}.${params.min_dp}_${params.min_pct_ind}_"\${mean_dp}".bed
    """
 }
 
 
 workflow {
-
 
    bam_files = Channel.fromPath(params.bam_files).map{ file -> [file, file + (file.getExtension() == "bam" ? ".bai" : ".crai")] }
    chromosomes = Channel.from(params.chromosomes)
@@ -104,7 +103,6 @@ workflow {
    depth_files = pileup(bam_files, chromosomes)
    aggregated_files = aggregate(depth_files.groupTuple())
    stats = calculate_stats(aggregated_files)
-   combined_channel = aggregated_files.join(stats)
-   create_accessibility_mask(combined_channel)
+   create_accessibility_mask(stats)
 
 }
