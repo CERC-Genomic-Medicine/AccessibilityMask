@@ -98,7 +98,6 @@ process create_accessibility_mask {
    else
        """
            high_coverage_regions.py -i ${aggregate_file} -dp ${params.min_dp} -ind ${params.min_pct_ind} -mdp ${params.mean_dp} -o ${aggregate_file.getSimpleName()}.${params.min_dp}_${params.min_pct_ind}_${params.mean_dp}.bed
-       fi
        """
 }
 
