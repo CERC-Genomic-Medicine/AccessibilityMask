@@ -102,7 +102,7 @@ process create_accessibility_mask {
 
 workflow {
 
-    if(params.skip == true){
+    if(params.skip == false){
        bam_files = Channel.fromPath(params.bam_files).map{ file -> [file, file + (file.getExtension() == "bam" ? ".bai" : ".crai")] }
        chromosomes = Channel.from(params.chromosomes)
 
