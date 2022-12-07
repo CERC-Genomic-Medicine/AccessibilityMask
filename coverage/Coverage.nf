@@ -32,7 +32,7 @@ process aggregate {
    cache "lenient"
    cpus 1
    memory "8GB"
-   time "3h"
+   time "5d"
    //scratch true
 
    input:
