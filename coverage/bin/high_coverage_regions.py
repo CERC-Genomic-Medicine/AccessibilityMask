@@ -36,7 +36,7 @@ def load_coverage_data(mean_depth, path_read = '/path/to/depth/data', path_write
             bp = int(columns[bp_colindex]) - 1
             pct = float(columns[pct_colindex])
             mean_dp = float(columns[mean_dp_colindex])
-            if (pct >= min_percent):
+            if (pct >= min_percent) and (mean_dp < mean_depth):
                 if(range_start == -1):
                     range_start = previous_number = bp
                 else:
