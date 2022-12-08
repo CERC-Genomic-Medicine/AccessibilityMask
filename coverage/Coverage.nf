@@ -117,12 +117,12 @@ process create_accessibility_mask {
 
 
 workflow {
-    if (params.compute_depth == true) {
+   if (params.compute_depth == true) {
        bam_files = Channel.fromPath(params.input_files).map{ file -> [file, file + (file.getExtension() == "bam" ? ".bai" : ".crai")] }
        chromosomes = Channel.from(params.chromosomes)
        depth_files = compute_depth(bam_files, chromosomes)
        aggregated_files = aggregate(depth_files.groupTuple())
-   }else{
+   } else {
        aggregated_files = Channel.fromPath(params.input_files)
    }
    create_accessibility_mask(summarize(aggregated_files))
