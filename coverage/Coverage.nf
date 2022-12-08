@@ -113,7 +113,7 @@ workflow {
        stats = calculate_stats(aggregated_files)
        create_accessibility_mask(stats)
    }else{
-       aggregated_files = Channel.from(params.depth_files)
+       aggregated_files = Channel.fromPath(params.depth_files)
        stats = calculate_stats(aggregated_files)
        create_accessibility_mask(stats)
    }
