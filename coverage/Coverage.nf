@@ -1,5 +1,4 @@
-process pileup {
-
+process compute_depth {
    errorStrategy "retry"
    maxRetries 3
    cache "lenient"
@@ -27,48 +26,49 @@ process pileup {
 
 
 process aggregate {
-   
    errorStrategy "finish"
    cache "lenient"
    cpus 1
    memory "8GB"
    time "5d"
-   //scratch true
+   scratch true
 
    input:
    tuple val(chromosome), path(depth_files), path(depth_indices)
 
    output:
-   path("${chromosome}.full.txt.gz")
+   path("${chromosome}.aggregated.txt.gz")
 
-   publishDir "result/aggregated/", pattern: "*.full.txt.gz*", mode: "copy"
+   publishDir "result/aggregated/", pattern: "*.aggregated.txt.gz*", mode: "copy"
 
    """
    find . -name "${chromosome}.*.depth.gz" > files_list.txt
-   aggregate.py -f t -i files_list.txt -o ${chromosome}.full.txt.gz
+   aggregate.py -f t -i files_list.txt -o ${chromosome}.aggregated.txt.gz
    """
 }
 
-process calculate_stats {
+
+process summarize {
    errorStrategy "finish"
    cache "lenient"
    cpus 1
-   memory "4GB"
+   memory "8GB"
    time "3h"
-   //scratch true
+   scratch true
 
    input:
-   path(aggregate_file)
+   path aggregate_file
 
    output:
-   tuple path("${aggregate_file.getSimpleName()}.${params.min_dp}_calculate_stats.txt"), path(aggregate_file)
+   tuple path("${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X.summary.txt"), path(aggregate_file)
    
-   publishDir "result/stats/", pattern: "*.txt", mode: "copy"
+   publishDir "result/summary/", pattern: "*.txt", mode: "copy"
 
    """
-   calculate.py -i ${aggregate_file} -dp ${params.min_dp} -o ${aggregate_file.getSimpleName()}.${params.min_dp}_calculate_stats.txt
+   summarize.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X.summary.txt
    """
 }
+
 
 process create_accessibility_mask {
 
@@ -80,42 +80,50 @@ process create_accessibility_mask {
    //scratch true
 
    input:
-   tuple  path(stats), path(aggregate_file)
+   tuple path(stats), path(aggregate_file)
 
    output:
    path("*.bed")
 
    publishDir "result/accessibility_mask/", pattern: "*.bed", mode: "copy"
 
-
    script:
-   if ((params.load_params) == true)
-       """
-           min_pct_ind=\$(grep "^5%" ${stats} | cut -f3)
-           mean_dp=\$(grep "99%" ${stats} | cut -f2)
-           high_coverage_regions.py -i ${aggregate_file} -dp ${params.min_dp} -ind "\${min_pct_ind}" -mdp "\${mean_dp}" -o ${aggregate_file.getSimpleName()}.${params.min_dp}_"\${min_pct_ind}"_"\${mean_dp}".bed
-       """
-   else
-       """
-           high_coverage_regions.py -i ${aggregate_file} -dp ${params.min_dp} -ind ${params.min_pct_ind} -mdp ${params.mean_dp} -o ${aggregate_file.getSimpleName()}.${params.min_dp}_${params.min_pct_ind}_${params.mean_dp}.bed
-       """
+   if ((params.min_pct_ind != null) && (params.max_mean_dp != null)) {
+      """
+      min_pct_ind=${params.min_pct_ind}   
+      max_mean_dp=${params.max_mean_dp}
+      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}.bed
+      """
+   } else if (params.min_pct_ind != null) {
+      """
+      min_pct_ind=${params.min_pct_ind}
+      max_mean_dp=\$(grep "^99%" ${stats} | cut -f2)
+      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}.bed
+      """
+   } else if (params.max_mean_dp != null) {
+      """
+      min_pct_ind=\$(grep "^5%" ${stats} | cut -f3)
+      max_mean_dp=${params.max_mean_dp}
+      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}.bed
+      """
+   } else {
+      """
+      min_pct_ind=\$(grep "^5%" ${stats} | cut -f3)
+      max_mean_dp=\$(grep "^99%" ${stats} | cut -f2)
+      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}.bed
+      """
+   }
 }
 
 
 workflow {
-
-    if(params.skip == false){
-       bam_files = Channel.fromPath(params.bam_files).map{ file -> [file, file + (file.getExtension() == "bam" ? ".bai" : ".crai")] }
+   if (params.compute_depth == true) {
+       bam_files = Channel.fromPath(params.input_files).map{ file -> [file, file + (file.getExtension() == "bam" ? ".bai" : ".crai")] }
        chromosomes = Channel.from(params.chromosomes)
-
-       depth_files = pileup(bam_files, chromosomes)
+       depth_files = compute_depth(bam_files, chromosomes)
        aggregated_files = aggregate(depth_files.groupTuple())
-       stats = calculate_stats(aggregated_files)
-       create_accessibility_mask(stats)
-   }else{
-       aggregated_files = Channel.fromPath(params.depth_files)
-       stats = calculate_stats(aggregated_files)
-       create_accessibility_mask(stats)
+   } else {
+       aggregated_files = Channel.fromPath(params.input_files)
    }
-
+   create_accessibility_mask(summarize(aggregated_files))
 }
