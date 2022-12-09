@@ -35,9 +35,10 @@ def make_bed(column_name, path_read, path_write,  min_percent = 1, max_depth = 1
                     if (bp == previous_number + 1):
                         previous_number = bp
                     else:
-                        fw.write(f"{chrom}\t{range_start}\t{previous_number}\n")
+                        fw.write(f"{chrom}\t{range_start}\t{previous_number + 1}\n")
                         range_start = previous_number = bp
-        fw.write(f"{chrom}\t{range_start}\t{previous_number}\n")
+        if(range_start != -1):
+            fw.write(f"{chrom}\t{range_start}\t{previous_number + 1}\n")
         
 
 if __name__ == "__main__":
