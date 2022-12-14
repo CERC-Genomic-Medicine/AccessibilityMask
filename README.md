@@ -20,6 +20,8 @@ in order to run the pipeline you will need to:
 
 6- load nextflow, samtools, and tabix
 
-7- run the following command:
+7- run the following command to submit the job to the compute canada:
 
-    nextflow run path/to/Compute_Coverage/coverage/Coverage.nf
+  sbatch --account="name of the account" --time=168:00:00 --mem=4G -J coverage --wrap="nextflow run /path/to/Coverage_Pipline/coverage/Coverage.nf" -o coverage.slurm.log
+  
+8- deactivate your python virtual environment.
