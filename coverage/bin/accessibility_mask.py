@@ -28,7 +28,7 @@ def make_bed(column_name, path_read, path_write,  min_percent = 1, max_depth = 1
             bp = int(columns[bp_colindex]) - 1
             pct = float(columns[pct_colindex])
             mean_dp = float(columns[mean_dp_colindex])
-            if (pct >= min_percent) and (mean_dp <= max_depth): # what happends when this condition is not satisfied? do you close the interval? what becomes with range_start and previous_number?
+            if (pct >= min_percent) and (mean_dp <= max_depth): 
                 if (range_start == -1):
                     range_start = previous_number = bp
                 else:
