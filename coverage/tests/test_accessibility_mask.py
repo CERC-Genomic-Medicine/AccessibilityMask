@@ -14,8 +14,8 @@ class TestInterval(unittest.TestCase):
 
     def test_one_large_region(self):
         """
-        This function is testing a condition where our final bed file contains a big interval,\
-        meaning that all base pairs meet the criteria for min percentage and max depth. And all\
+        This function is testing a condition where our final bed file contains a big interval,
+        meaning that all base pairs meet the criteria for min percentage and max depth. And all
         base pairs are continous.
         """
         
@@ -28,7 +28,7 @@ class TestInterval(unittest.TestCase):
 
     def test_no_regions(self):
         """
-        This function is testing a condition where our final bed file contains no interval,\
+        This function is testing a condition where our final bed file contains no interval,
         meaning that none of base pairs meet the criteria for min percentage and max depth.
         """
         
@@ -41,8 +41,8 @@ class TestInterval(unittest.TestCase):
     
     def test_one_no_region_one_large_region(self):
         """
-        This function is testing a condition where our final bed file contains an interval\
-        However, the interval doesn't start from the first base pair. Because, there is a set\
+        This function is testing a condition where our final bed file contains an interval
+        However, the interval doesn't start from the first base pair. Because, there is a set
         of base pairs at the begining that doesn't meet the criteria.
         """
         
@@ -55,8 +55,8 @@ class TestInterval(unittest.TestCase):
 
     def test_one_large_region_one_no_region(self):
         """
-        This function is testing a condition where our final bed file contains an interval,\
-        the interval starts from the first base pair but it doesn't contain a subset of base\
+        This function is testing a condition where our final bed file contains an interval,
+        the interval starts from the first base pair but it doesn't contain a subset of base
         pairs at the end. Because they don't meet the criteria.
         """
         
@@ -69,8 +69,8 @@ class TestInterval(unittest.TestCase):
     
     def test_one_no_region_one_region_one_no_region(self):
         """
-        This function is testing a condition where our final bed file contains an interval.\
-        However, the interval doesn't start from the first base pair and also it doesn't\
+        This function is testing a condition where our final bed file contains an interval.
+        However, the interval doesn't start from the first base pair and also it doesn't
         contain a set of regions at the end.
         """
         
@@ -83,8 +83,8 @@ class TestInterval(unittest.TestCase):
             
     def test_one_region_one_no_region_one_region(self):
         """
-        This function is testing a condition where our final bed file contains two intervals.\
-        one interval at the begining of base pairs set and one at the end. There is a region in\
+        This function is testing a condition where our final bed file contains two intervals.
+        one interval at the begining of base pairs set and one at the end. There is a region in
         the middle which doesn't meet the criteria.
         """
         
@@ -97,8 +97,8 @@ class TestInterval(unittest.TestCase):
             
     def test_two_non_continuous_regions(self):
         """
-        This function is testing a condition where our final bed file contains two intervals.\
-        However, the intervals are not continous. If the first interval ends at position 3 the\
+        This function is testing a condition where our final bed file contains two intervals.
+        However, the intervals are not continous. If the first interval ends at position 3 the
         next will start at position 8.
         """
         
@@ -111,8 +111,8 @@ class TestInterval(unittest.TestCase):
     
     def test_three_non_continuous_regions(self):
         """
-        This function is testing a condition where our final bed file contains three intervals.\
-        However, the intervals are not continous. As an example, if the first interval ends at \
+        This function is testing a condition where our final bed file contains three intervals.
+        However, the intervals are not continous. As an example, if the first interval ends at 
         position 3 the next will start at position 8.
         """
         
@@ -125,9 +125,9 @@ class TestInterval(unittest.TestCase):
     
     def test_two_non_continuous_regions_one_no_region(self):
         """
-        This function is testing a condition where our final bed file contains two intervals.\
-        However, the intervals are not continous. As an example, if the first interval ends at\
-        position 3 the next will start at position 8. Besides there is a subset of base pairs at\
+        This function is testing a condition where our final bed file contains two intervals.
+        However, the intervals are not continous. As an example, if the first interval ends at
+        position 3 the next will start at position 8. Besides there is a subset of base pairs at
         the end that doesn't meet the criteria.
         """
         
@@ -140,10 +140,10 @@ class TestInterval(unittest.TestCase):
     
     def test_one_no_region_two_non_continuous_regions(self):
         """
-        This function is testing a condition where our final bed file contains two intervals.\
-        However, the intervals are not continous. As an example, if the first interval ends at\
-        position 3 the next will start at position 8. Besides there is a subset of base pairs at\
-        the the begining that doesn't meet the criteria, hense our first interval doesn't start\
+        This function is testing a condition where our final bed file contains two intervals.
+        However, the intervals are not continous. As an example, if the first interval ends at
+        position 3 the next will start at position 8. Besides there is a subset of base pairs at
+        the the begining that doesn't meet the criteria, hense our first interval doesn't start
         from very beggining base pair.
         """
         
