@@ -64,4 +64,8 @@ if __name__ == '__main__':
                     ofile.write('\n'.encode())
             else:
                     ofile.write('}\n'.encode())
+<<<<<<< HEAD
     pysam.tabix_index(args.out_file_name, seq_col = 0, start_col = 1, end_col = 1, line_skip = 1, force = True)
+=======
+   pysam.tabix_index(args.out_file_name, seq_col = 0, start_col = 1, end_col = 1, line_skip = 1, force = True)
+>>>>>>> 6dad9cc4fa9f5dd9af7142994f10e0321b6106c7
