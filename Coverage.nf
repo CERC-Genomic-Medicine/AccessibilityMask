@@ -29,8 +29,8 @@ process aggregate {
    errorStrategy "finish"
    cache "lenient"
    cpus 1
-   memory "8GB"
-   time "5d"
+   memory "16GB"
+   time "7d"
    scratch true
 
    input:
@@ -52,7 +52,7 @@ process summarize {
    errorStrategy "finish"
    cache "lenient"
    cpus 1
-   memory "8GB"
+   memory "16GB"
    time "3h"
    scratch true
 
@@ -75,7 +75,7 @@ process create_accessibility_mask {
    errorStrategy "finish"
    cache "lenient"
    cpus 1
-   memory "4GB"
+   memory "16GB"
    time "1h"
    //scratch true
 
