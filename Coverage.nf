@@ -91,32 +91,37 @@ process create_accessibility_mask {
    output:
    path("*.bed")
 
-   publishDir "result/accessibility_mask/", pattern: "*.bed", mode: "copy"
+   publishDir "result/accessibility_mask/with_chr/", pattern: "*_with_chr.bed", mode: "copy"
+   publishDir "result/accessibility_mask/without_chr/", pattern: "*_without_chr.bed", mode: "copy"
 
    script:
    if ((params.min_pct_ind != null) && (params.max_mean_dp != null)) {
       """
       min_pct_ind=${params.min_pct_ind}   
       max_mean_dp=${params.max_mean_dp}
-      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}.bed
+      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_without_chr.bed
+      awk '{print ("chr"\$1"\t"\$2"\t"\$3)}' ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_without_chr.bed > ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_with_chr.bed
       """
    } else if (params.min_pct_ind != null) {
       """
       min_pct_ind=${params.min_pct_ind}
       max_mean_dp=\$(grep "^99%" ${stats} | cut -f2)
-      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}.bed
+      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_without_chr.bed
+      awk '{print ("chr"\$1"\t"\$2"\t"\$3)}' ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_without_chr.bed > ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_with_chr.bed
       """
    } else if (params.max_mean_dp != null) {
       """
       min_pct_ind=\$(grep "^5%" ${stats} | cut -f3)
       max_mean_dp=${params.max_mean_dp}
-      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}.bed
+      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_without_chr.bed
+      awk '{print ("chr"\$1"\t"\$2"\t"\$3)}' ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_without_chr.bed > ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_with_chr.bed
       """
    } else {
       """
       min_pct_ind=\$(grep "^5%" ${stats} | cut -f3)
       max_mean_dp=\$(grep "^99%" ${stats} | cut -f2)
-      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}.bed
+      accessibility_mask.py -i ${aggregate_file} -c PCT_INDV_OVER_${params.min_dp}X -m "\${min_pct_ind}" -M "\${max_mean_dp}" -o ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_without_chr.bed
+      awk '{print ("chr"\$1"\t"\$2"\t"\$3)}' ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_without_chr.bed > ${aggregate_file.getBaseName()}.PCT_INDV_OVER_${params.min_dp}X_\${min_pct_ind}_MEAN_\${max_mean_dp}_with_chr.bed
       """
    }
 }
