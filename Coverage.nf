@@ -19,14 +19,14 @@ process compute_depth {
 
    output:
    tuple val(chromosome),
-      path("${chromosome}.${bam.getSimpleName()}.depth.gz"), 
-      path("${chromosome}.${bam.getSimpleName()}.depth.gz.tbi")
+      path("${chromosome}.${bam.getBaseName()}.depth.gz"), 
+      path("${chromosome}.${bam.getBaseName()}.depth.gz.tbi")
 
     publishDir "result/depth/${chromosome}", pattern: "*.depth*", mode: "copy"
 
     """
-    samtools depth -a -s -q20 -Q20 -r ${chromosome} ${bam} | bgzip > ${chromosome}.${bam.getSimpleName()}.depth.gz
-    tabix -s1 -b2 -e2 ${chromosome}.${bam.getSimpleName()}.depth.gz
+    samtools depth -a -s -q20 -Q20 -r ${chromosome} ${bam} | bgzip > ${chromosome}.${bam.getBaseName()}.depth.gz
+    tabix -s1 -b2 -e2 ${chromosome}.${bam.getBaseName()}.depth.gz
     """
 }
 
@@ -58,7 +58,7 @@ process summarize {
    errorStrategy "finish"
    cache "lenient"
    cpus 1
-   memory "16GB"
+   memory "24GB"
    time "3h"
    scratch true
 
